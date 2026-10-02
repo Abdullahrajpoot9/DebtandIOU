@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KhataBook - Udhar & Len Den Manager</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom CSS link -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-emerald-500/20">
+          <i class="fa-solid me-0.5 fa-book-open"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">KhataBook</h1>
+          <p class="text-xs text-slate-400 font-medium">Apna Udhar aur Hisab-Kitab Sambhalein</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="export-btn" title="Data Backup Karein" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-2 text-xs font-semibold border border-slate-700/60">
+          <i class="fa-solid fa-download"></i>
+          <span class="hidden sm:inline">Export</span>
+        </button>
+        <button id="import-btn-trigger" title="Backup Restore Karein" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition flex items-center gap-2 text-xs font-semibold border border-slate-700/60">
+          <i class="fa-solid fa-upload"></i>
+          <span class="hidden sm:inline">Import</span>
+        </button>
+        <input type="file" id="import-file-input" accept=".json" class="hidden" />
+        
+        <button id="btn-add-entry" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm">
+          <i class="fa-solid fa-plus text-xs"></i>
+          <span>Naya Entry Karein</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- METRICS CARDS -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Mujhe Dena Hai -->
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-all"></div>
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-rose-400">Mujhe Dena Hai (I Owe)</span>
+          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </div>
+        </div>
+        <div id="stat-i-owe" class="text-2xl sm:text-3xl font-extrabold text-white">Rs. 0</div>
+        <p id="stat-i-owe-sub" class="text-xs text-slate-400 mt-1">0 Udhar Baki Hain</p>
+      </div>
+
+      <!-- Mujhe Lena Hai -->
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all"></div>
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Mujhe Lena Hai (Owes Me)</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center"></i>
+          </div>
+        </div>
+        <div id="stat-owes-me" class="text-2xl sm:text-3xl font-extrabold text-white">Rs. 0</div>
+        <p id="stat-owes-me-sub" class="text-xs text-slate-400 mt-1">0 Logon Se Wapas Lenay Hain</p>
+      </div>
+
+      <!-- Kul Hisab Net Balance -->
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-all"></div>
+        <div class="flex justify-between items-start mb-2">
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Kul Net Hisab</span>
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-scale-balanced"></i>
+          </div>
+        </div>
+        <div id="stat-net" class="text-2xl sm:text-3xl font-extrabold text-white">Rs. 0</div>
+        <p id="stat-net-sub" class="text-xs text-slate-400 mt-1">Total Balance Summary</p>
+      </div>
+    </section>
+
+    <!-- NAVIGATION TABS & FILTERS -->
+    <section class="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border-b border-slate-800 pb-4">
+      <!-- Tabs -->
+      <div class="flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50 self-start md:self-auto overflow-x-auto max-w-full">
+        <button data-tab="all" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition whitespace-nowrap active-tab">
+          Sab Hisab (All)
+        </button>
+        <button data-tab="i-owe" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition whitespace-nowrap text-slate-400 hover:text-white">
+          <i class="fa-solid fa-circle text-[8px] me-1.5 text-rose-500"></i>Mujhe Dena Hai
+        </button>
+        <button data-tab="owes-me" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition whitespace-nowrap text-slate-400 hover:text-white">
+          <i class="fa-solid fa-circle text-[8px] me-1.5 text-emerald-500"></i>Mujhe Lena Hai
+        </button>
+        <button data-tab="people" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold transition whitespace-nowrap text-slate-400 hover:text-white">
+          <i class="fa-solid fa-users text-xs me-1.5"></i>Banday Ka Khata
+        </button>
+      </div>
+
+      <!-- Controls: Search & Filters -->
+      <div id="entries-controls" class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+        <div class="relative flex-grow sm:w-64">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="search-input" placeholder="Naam ya Note dhundein..." class="w-full bg-slate-800/80 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+        </div>
+        
+        <select id="status-filter" class="bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="all">Tamam Status</option>
+          <option value="unsettled">Udhar Baqi (Pending)</option>
+          <option value="settled">Hisab Chukta (Paid)</option>
+          <option value="overdue">Tareekh Guzar Gayi</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ENTRIES VIEW -->
+    <section id="view-entries" class="space-y-3">
+      <!-- List generated by Javascript -->
+      <div id="entries-list" class="space-y-3"></div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden py-16 text-center space-y-3 bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
+        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-500">
+          <i class="fa-solid fa-receipt text-xl"></i>
+        </div>
+        <h3 class="text-slate-300 font-semibold text-sm">Koi Entry Nahi Mili</h3>
+        <p class="text-xs text-slate-500 max-w-sm mx-auto">Filhal koi hisab mojud nahi hai. Naya entry add karne ke liye upar button dabayein.</p>
+      </div>
+    </section>
+
+    <!-- PEOPLE DIRECTORY VIEW -->
+    <section id="view-people" class="hidden space-y-4">
+      <div id="people-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="people-empty" class="hidden py-16 text-center space-y-3 bg-slate-800/20 border border-dashed border-slate-800 rounded-2xl">
+        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto text-slate-500">
+          <i class="fa-solid fa-user-slash text-xl"></i>
+        </div>
+        <h3 class="text-slate-300 font-semibold text-sm">Koi Banda Shamil Nahi</h3>
+        <p class="text-xs text-slate-500">Pehle koi entry add karein taakay directory ban sake.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ADD / EDIT TRANSACTION MODAL -->
+  <div id="modal-entry" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl modal-animate-in">
+      <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
+        <h2 id="modal-title" class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-emerald-400"></i>
+          <span>Naya Entry Shamil Karein</span>
+        </h2>
+        <button class="btn-close-modal text-slate-400 hover:text-white p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <form id="entry-form" class="p-5 space-y-4">
+        <input type="hidden" id="entry-id" />
+
+        <!-- Transaction Type Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Kism Ka Intikhab Karein</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="type" value="i-owe" class="peer hidden" checked />
+              <div class="p-3 rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:border-rose-500 peer-checked:bg-rose-500/10 peer-checked:text-rose-400 text-slate-400 flex items-center gap-3 transition">
+                <i class="fa-solid fa-arrow-up-right-from-square text-base"></i>
+                <div>
+                  <div class="text-xs font-bold text-white">Mujhe Dena Hai</div>
+                  <div class="text-[10px] text-slate-400">Maine paise denay hain</div>
+                </div>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="type" value="owes-me" class="peer hidden" />
+              <div class="p-3 rounded-xl border border-slate-700 bg-slate-800/50 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 text-slate-400 flex items-center gap-3 transition">
+                <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center text-base"></i>
+                <div>
+                  <div class="text-xs font-bold text-white">Mujhe Lena Hai</div>
+                  <div class="text-[10px] text-slate-400">Mujhe paise wapas milne hain</div>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Person Name & Auto Datalist -->
+        <div>
+          <label for="person-name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Bande Ka Naam</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" id="person-name" required list="people-datalist" placeholder="Maslan: Ali Raza, Usman, etc." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+            <datalist id="people-datalist"></datalist>
+          </div>
+        </div>
+
+        <!-- Amount & Category Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="amount" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Raqam (PKR / Rs.)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+              <input type="number" id="amount" step="1" min="1" required placeholder="500" class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-semibold" />
+            </div>
+          </div>
+
+          <div>
+            <label for="category" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Kategori</label>
+            <select id="category" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+              <option value="Khana / Resturant">Khana / Restaurant</option>
+              <option value="Udhari / Cash Udhar">Udhari / Cash</option>
+              <option value="Ghar / Bijli / Kiraya">Ghar / Kiraya / Bijli</option>
+              <option value="Safar / Petrol">Safar / Petrol</option>
+              <option value="Shopping / Grocery">Shopping / Kiryana</option>
+              <option value="Digar (Other)">Digar (Other)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Due Date & Notes Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="due-date" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Wapsi Ki Tareekh (Optional)</label>
+            <input type="date" id="due-date" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+          </div>
+
+          <div>
+            <label for="notes" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Tafseel / Note (Optional)</label>
+            <input type="text" id="notes" placeholder="Maslan: Biryani ke paise" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" class="btn-close-modal px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs transition">
+            Save Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PAY / SETTLE PARTIAL MODAL -->
+  <div id="modal-settle" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl modal-animate-in">
+      <div class="p-5 border-b border-slate-800 flex justify-between items-center">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-hand-holding-dollar text-emerald-400"></i>
+          <span>Hisab Wasiyat / Payment</span>
+        </h2>
+        <button class="btn-close-settle text-slate-400 hover:text-white p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <form id="settle-form" class="p-5 space-y-4">
+        <input type="hidden" id="settle-entry-id" />
+        
+        <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/60 text-xs space-y-1">
+          <div class="text-slate-400">Banda: <span id="settle-person-name" class="text-white font-semibold">--</span></div>
+          <div class="text-slate-400">Baqi Mandah Raqam: <span id="settle-remaining-amount" class="text-emerald-400 font-bold">Rs. 0</span></div>
+        </div>
+
+        <div>
+          <label for="settle-amount" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Ada Ki Gayi Raqam (PKR)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Rs.</span>
+            <input type="number" id="settle-amount" step="1" min="1" required class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-bold" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" id="btn-pay-full" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition border border-slate-700">
+            Pora Hisab Chukta Karein
+          </button>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" class="btn-close-settle px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-semibold transition">
+            Cancel
+          </button>
+          <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition">
+            Payment Register Karein
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom App JS File -->
+  <script src="app.js"></script>
+</body>
+</html>
